@@ -5,7 +5,7 @@ import anthropic
 
 def get_pr_diff(repo, pr_number, token):
     """Fetches the raw diff of the Pull Request from GitHub API."""
-    url = f"https://github.com{repo}/pulls/{pr_number}"
+    url = f"https://github.com/{repo}/pulls/{pr_number}"
     headers = {
         "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github.v3.diff",
@@ -51,7 +51,7 @@ def review_diff(diff_text):
 
 def post_comment(repo, pr_number, token, body_text):
     """Posts the final Claude review as a comment on the PR."""
-    url = f"https://github.com{repo}/issues/{pr_number}/comments"
+    url = f"https://github.com/{repo}/issues/{pr_number}/comments"
     headers = {
         "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github+json",
