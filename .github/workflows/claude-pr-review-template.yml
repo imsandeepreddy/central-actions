@@ -40,5 +40,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.TARGET_GITHUB_TOKEN }}
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
-        run: python .central-actions/src/ai_review/review.py
+        run: |
+          # Native CLI download 
+          gh pr diff "$PR_NUMBER" --repo "$REPO" > pr_diff.txt
+          python .central-templates/src/ai_review/review.py
 
