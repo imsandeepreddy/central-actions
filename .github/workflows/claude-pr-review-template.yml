@@ -42,6 +42,6 @@ jobs:
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
           # Native CLI download 
-          gh pr diff "$PR_NUMBER" --repo "$REPO" > pr_diff.txt
+          #gh pr diff "$PR_NUMBER" --repo "$REPO" > pr_diff.txt
           python .central-actions/src/ai_review/review.py
 
