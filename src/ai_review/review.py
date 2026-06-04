@@ -3,26 +3,8 @@ import sys
 import requests
 import anthropic
 
-def get_pr_diff(repo, pr_number, token):
-    """Fetches the raw diff of the Pull Request from GitHub API."""
-    url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}"
-    headers = {
-        "Authorization": f"Bearer {token}",
-        # FIX: Changed from application/vnd.github.v3.diff
-        "Accept": "application/vnd.github+diff", 
-        "X-GitHub-Api-Version": "2022-11-28"
-    }
-    
-    response = requests.get(url, headers=headers)
-    if response.status_code != 200:
-        print(f"Error fetching PR diff: {response.status_code} - {response.text}")
-        sys.exit(1)
-        
-    return response.text
-
 def review_diff(diff_text):
     """Sends the diff text to Claude for analysis and returns the markdown review."""
-    # The client automatically picks up ANTHROPIC_API_KEY from the environment variables
     client = anthropic.Anthropic()
     
     system_prompt = (
@@ -36,9 +18,9 @@ def review_diff(diff_text):
     )
     
     try:
-        # Using the standard modern Claude 3.5 Sonnet model
+        # Note: Updated object parsing structure for modern Claude text extraction
         message = client.messages.create(
-            model="claude-haiku-4-5-20251001",
+            model="claude-3-5-sonnet-latest",
             max_tokens=2000,
             system=system_prompt,
             messages=[
@@ -52,7 +34,7 @@ def review_diff(diff_text):
 
 def post_comment(repo, pr_number, token, body_text):
     """Posts the final Claude review as a comment on the PR."""
-    url = f"https://github.com/{repo}/issues/{pr_number}/comments"
+    url = f"https://api.github.com/repos/{repo}/issues/{pr_number}/comments"
     headers = {
         "Authorization": f"Bearer {token}",
         "Accept": "application/vnd.github+json",
@@ -67,7 +49,6 @@ def post_comment(repo, pr_number, token, body_text):
     print("Successfully posted Claude's review to the PR!")
 
 if __name__ == "__main__":
-    # Pull required values securely from environment variables mapped by GitHub Actions
     repo = os.getenv("REPO")
     pr_number = os.getenv("PR_NUMBER")
     github_token = os.getenv("GITHUB_TOKEN")
@@ -77,14 +58,18 @@ if __name__ == "__main__":
         sys.exit(1)
         
     print(f"Starting Claude PR Review for {repo} PR #{pr_number}...")
-    diff = get_pr_diff(repo, pr_number, github_token)
+    
+    # Read diff directly from the text file populated by GitHub CLI step
+    if not os.path.exists("pr_diff.txt"):
+        print("Error: pr_diff.txt was not generated.")
+        sys.exit(1)
+        
+    with open("pr_diff.txt", "r", encoding="utf-8") as f:
+        diff = f.read()
     
     if not diff.strip():
         print("PR diff is empty. Skipping review.")
         sys.exit(0)
-    
-    #with open("pr_diff.txt", "r") as f:
-    #    diff = f.read()
         
     review = review_diff(diff)
     post_comment(repo, pr_number, github_token, review)
