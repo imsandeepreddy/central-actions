@@ -1,1 +1,44 @@
-#claude-pr-review-template.yml
+name: Claude PR Review Template
+
+on:
+  workflow_call:
+    secrets:
+      ANTHROPIC_API_KEY:
+        required: true
+        description: "API Key for Anthropic Claude"
+      TARGET_GITHUB_TOKEN:
+        required: true
+        description: "GitHub Token with pull-request:write permissions"
+
+jobs:
+  review:
+    runs-on: ubuntu-latest
+    steps:
+      # Step 1: Checkout the caller's repository to access the PR context
+      - name: Checkout caller code
+        uses: actions/checkout@v4
+
+      # Step 2: Checkout this template repo into a subfolder to get the python script
+      - name: Checkout template scripts
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ github.repository_owner }}/central-actions
+          path: .central-actions
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r .central-actions/src/ai_review/requirements.txt
+
+      - name: Run Claude review
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+          GITHUB_TOKEN: ${{ secrets.TARGET_GITHUB_TOKEN }}
+          REPO: ${{ github.repository }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+        run: python .central-actions/src/ai_review/review.py
+
