@@ -5,10 +5,11 @@ import anthropic
 
 def get_pr_diff(repo, pr_number, token):
     """Fetches the raw diff of the Pull Request from GitHub API."""
-    url = f"https://github.com/{repo}/pulls/{pr_number}"
+    url = f"https://api.github.com/repos/{repo}/pulls/{pr_number}"
     headers = {
         "Authorization": f"Bearer {token}",
-        "Accept": "application/vnd.github.v3.diff",
+        # FIX: Changed from application/vnd.github.v3.diff
+        "Accept": "application/vnd.github+diff", 
         "X-GitHub-Api-Version": "2022-11-28"
     }
     
