@@ -43,5 +43,5 @@ jobs:
         run: |
           # Native CLI download 
           gh pr diff "$PR_NUMBER" --repo "$REPO" > pr_diff.txt
-          python .central-templates/src/ai_review/review.py
+          python .central-actions/src/ai_review/review.py
 
