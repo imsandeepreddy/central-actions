@@ -14,11 +14,9 @@ jobs:
   review:
     runs-on: ubuntu-latest
     steps:
-      # Step 1: Checkout the caller's repository to access the PR context
       - name: Checkout caller code
         uses: actions/checkout@v4
 
-      # Step 2: Checkout this template repo into a subfolder to get the python script
       - name: Checkout template scripts
         uses: actions/checkout@v4
         with:
@@ -41,7 +39,6 @@ jobs:
           REPO: ${{ github.repository }}
           PR_NUMBER: ${{ github.event.pull_request.number }}
         run: |
-          # Native CLI download 
-          #gh pr diff "$PR_NUMBER" --repo "$REPO" > pr_diff.txt
+          # Use native CLI to stream diff safely to disk
+          gh pr diff "$PR_NUMBER" --repo "$REPO" > pr_diff.txt
           python .central-actions/src/ai_review/review.py
-
