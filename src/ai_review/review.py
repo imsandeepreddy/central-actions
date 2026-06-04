@@ -77,9 +77,14 @@ if __name__ == "__main__":
         sys.exit(1)
         
     print(f"Starting Claude PR Review for {repo} PR #{pr_number}...")
+    diff = get_pr_diff(repo, pr_number, github_token)
     
-    with open("pr_diff.txt", "r") as f:
-        diff = f.read()
+    if not diff.strip():
+        print("PR diff is empty. Skipping review.")
+        sys.exit(0)
+    
+    #with open("pr_diff.txt", "r") as f:
+    #    diff = f.read()
         
     review = review_diff(diff)
     post_comment(repo, pr_number, github_token, review)
