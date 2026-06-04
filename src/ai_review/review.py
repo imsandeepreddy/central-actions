@@ -20,7 +20,7 @@ def review_diff(diff_text):
     try:
         # Note: Updated object parsing structure for modern Claude text extraction
         message = client.messages.create(
-            model="claude-3-5-sonnet-latest",
+            model="claude-haiku-4-5-20251001",
             max_tokens=2000,
             system=system_prompt,
             messages=[
